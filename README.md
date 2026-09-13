@@ -25,6 +25,10 @@ This repo was started so I could get this out of my head and do the things I'm s
 
 # Design Ideas
 
+## Cylinder
+
+There are some classic typewriters that use a cylinder instead of a ball. This is a simpler motion and may be a better starting point.
+
 ## Ball and Striking mechanism
 
 Use the rear suspension from an RC car.
@@ -65,11 +69,3 @@ Rack and pinion (or worm?) drives it side to side, basic IR sensors on each side
 I can't think of a good way to drive the platen from the base. I think it will need to be driven with a belt off a DC stepper motor on the carriage. This will allow it to be spun manually.
 
 There will need to be a standard wire and plug from the base to the carriage, with enough slack to move.
-
-# Todo
-
-* Get size of Selectric ball
-* Find a compatible RC tire size
-* Choose a donor car
-* Get measurements for parts
-* Draw up basic motion
