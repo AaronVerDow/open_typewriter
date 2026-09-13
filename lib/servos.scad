@@ -156,9 +156,9 @@ module alignds420(position, rotation, screws = 0, axle_lenght = 0)
  * @param vector rotation The rotation vector
  */
 module futabas3003(position, rotation) {
+		rotate(rotation) {
 	translate([-10, -30, -36.1])
 	translate(position) {
-		rotate(rotation) {
 			union() {
 				color("#333333")
 				// Box and ears
