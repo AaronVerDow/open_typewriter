@@ -5,7 +5,20 @@ platen_d=20;
 platen_w=150; // I do want an A5 sized platen
 striker_h=35;
 
+pad=0.1;
+padd=pad*2;
+
+shield_wall=5;
+shield_gap=5;
+shield_id=striker_d+shield_gap*2;
+shield_od=shield_id+shield_wall*2;
+shield_h=striker_h+shield_wall;
+
 servo_h=36.1;
+
+bearing_d=7;
+bearing_h=3;
+bearing_lip=0.5; // used for width and depth
 
 use <../lib/servos.scad>;
 use <../lib/gears.scad>;
@@ -27,19 +40,24 @@ module assemble() {
 	striker();
 }
 
-module striker_assembly() {
-	translate([0,0,8])
-	striker();
+module shield() {
 
-	// just guessing mesh for now
-	translate([0,38]) {
-		futabas3003([0,0,0], [0,0,0]);
-		herringbone_gear(modul=1.5, tooth_number=30, width=8, bore=6, pressure_angle=20, helix_angle=30);
-	}
-
-	herringbone_gear(modul=1.5, tooth_number=20, width=8, bore=6, pressure_angle=20, helix_angle=30);
+	difference() {
+		cylinder(d=shield_od,h=shield_h);
+		translate([0,0,-pad])
+		cylinder(d=shield_id,h=shield_h+padd);
+	};
 
 }
+
+module striker_assembly() {
+	striker();
+
+	futabas3003([0,0,0], [0,0,0]);
+	shield();
+
+}
+
 
 //assemble();
 striker_assembly();
