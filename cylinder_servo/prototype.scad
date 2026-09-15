@@ -5,7 +5,8 @@ padd=pad*2;
 zero=0.0001;
 
 // eyeballed
-servo_wing_top=7;
+servo_horn_h=3;
+servo_wing_top=15.5-2.5-servo_horn_h;
 
 // guessed variables
 platen_d=20;
@@ -84,13 +85,52 @@ module bearing() {
 	}
 }
 
+servo_wing_hole=4.5;
+
+module dirror_x(x=0) {
+	children();
+	translate([x,0])
+	mirror([1,0])
+	children();
+
+}
+
+
+module dirror_y(y=0) {
+	children();
+	translate([0,y])
+	mirror([0,1])
+	children();
+
+}
+
+servo_hole_wall=2.5;
+servo_hole_od=servo_hole_wall*2+servo_wing_hole;
 
 module shield() {
 	shield_angle = 90;
+	servo_hole_x=49;
+	servo_hole_y=10;
+
+	module servo_holes(d=servo_wing_hole) {
+		rotate([0,0,90])
+		translate([-14.65,-servo_hole_y/2])
+		dirror_x(servo_hole_x)
+		dirror_y(servo_hole_y)
+		circle(d=d);
+	}
+
+	translate([0,0,-servo_wing_top])
+	linear_extrude(height=servo_wing_top)
+	difference() {
+		hull()
+		servo_holes(servo_hole_od);
+		servo_holes();
+	}
+
 
 	// main body
 	translate([0,0,-servo_wing_top])
-	rotate([0,0,180])
 	intersection() {
 		difference() {
 			arc(shield_od/2+pad,-shield_angle/2,shield_angle/2,shield_h,shield_point_od);
@@ -105,7 +145,7 @@ module shield() {
 module striker_assembly() {
 	striker();
 
-	futabas3003([0,0,0], [0,0,0]);
+	futabas3003([0,0,0], [0,0,180]);
 	shield();
 
 	*translate([0,0,striker_h])
