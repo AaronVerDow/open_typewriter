@@ -1,20 +1,26 @@
 striker_d=35; //based off selectric size
 
+pad=0.1;
+padd=pad*2;
+zero=0.0001;
+
+// eyeballed
+servo_wing_top=7;
+
 // guessed variables
 platen_d=20;
 platen_w=150; // I do want an A5 sized platen
 striker_h=35;
 
-pad=0.1;
-padd=pad*2;
-
-shield_wall=5;
+shield_wall=2.5;
 shield_lid=2.5;
-shield_bearing_wall=shield_lid;
-shield_gap=5;
+shield_bearing_wall=shield_wall;
+shield_gap=2.5;
+shield_upper_gap=0.5; //must account for bearing flange
 shield_id=striker_d+shield_gap*2;
 shield_od=shield_id+shield_wall*2;
-shield_h=striker_h+shield_wall;
+shield_h=striker_h+shield_bearing_wall+shield_upper_gap+servo_wing_top;
+
 
 servo_h=36.1;
 
@@ -23,13 +29,32 @@ bearing_od=7;
 bearing_h=3;
 bearing_lip=0.5; // used for width and depth
 
+shield_point_od=bearing_od+shield_bearing_wall*2;
+
 shift_d=50;
+
 
 $fn=90;
 
 use <../lib/servos.scad>;
 use <../lib/gears.scad>;
 
+
+module pad_z() {
+	translate([0,0,-pad])
+	children();
+}
+
+module arc(arc,a=0,b=0,height=zero,corner=zero) {
+	minkowski() {
+		rotate(a)
+		rotate_extrude(angle=b-a)
+		square([arc-corner/2,height]);
+		cylinder(d=corner,h=zero);
+	}
+
+
+}
 
 module platen() {
 	color("#222222")
@@ -61,29 +86,24 @@ module bearing() {
 
 
 module shield() {
+	shield_angle = 90;
 
-	difference() {
-		cylinder(d=shield_od,h=shield_h);
-		translate([0,0,-pad])
-		cylinder(d=shield_id,h=shield_h+padd);
+	// main body
+	translate([0,0,-servo_wing_top])
+	rotate([0,0,180])
+	intersection() {
+		difference() {
+			arc(shield_od/2+pad,-shield_angle/2,shield_angle/2,shield_h,shield_point_od);
+			pad_z()
+			cylinder(d=shield_id,h=shield_h-shield_bearing_wall+pad);
+			translate([0,0,pad])
+			cylinder(d=bearing_od,h=shield_h);
+		};
 	};
-
-	translate([0,0,striker_h+bearing_lip])
-	difference() {
-		cylinder(d=bearing_od+shield_bearing_wall*2,h=shield_bearing_wall);
-		translate([0,0,-pad])
-		cylinder(d=bearing_od,h=shield_bearing_wall+padd);
-
-	}
-
-
 }
 
 module striker_assembly() {
 	striker();
-
-	translate([-30,0,-50])
-	futabas3003([0,0,0], [-90,0,0]);
 
 	futabas3003([0,0,0], [0,0,0]);
 	shield();
