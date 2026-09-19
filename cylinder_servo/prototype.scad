@@ -22,7 +22,6 @@ shield_id=striker_d+shield_gap*2;
 shield_od=shield_id+shield_wall*2;
 shield_h=striker_h+shield_bearing_wall+shield_upper_gap+servo_wing_top;
 
-
 servo_h=36.1;
 
 bearing_id=3;
@@ -34,12 +33,21 @@ shield_point_od=bearing_od+shield_bearing_wall*2;
 
 shift_d=50;
 
+servo_wing_hole=4.5;
+servo_hole_wall=2.5;
+servo_hole_od=servo_hole_wall*2+servo_wing_hole;
+shield_angle=90;
+servo_hole_x=49;
+servo_hole_y=10;
+
+servo_x=40.4;
+servo_x_offset=10.3;
+servo_y=19.8;
 
 $fn=90;
 
 use <../lib/servos.scad>;
 use <../lib/gears.scad>;
-
 
 module pad_z() {
 	translate([0,0,-pad])
@@ -85,8 +93,6 @@ module bearing() {
 	}
 }
 
-servo_wing_hole=4.5;
-
 module dirror_x(x=0) {
 	children();
 	translate([x,0])
@@ -94,7 +100,6 @@ module dirror_x(x=0) {
 	children();
 
 }
-
 
 module dirror_y(y=0) {
 	children();
@@ -104,54 +109,63 @@ module dirror_y(y=0) {
 
 }
 
-servo_hole_wall=2.5;
-servo_hole_od=servo_hole_wall*2+servo_wing_hole;
+module servo_holes(d=servo_wing_hole) {
+	rotate([0,0,90])
+	translate([-14.65,-servo_hole_y/2])
+	dirror_x(servo_hole_x)
+	dirror_y(servo_hole_y)
+	circle(d=d);
+}
 
-module shield() {
-	shield_angle = 90;
-	servo_hole_x=49;
-	servo_hole_y=10;
-
-	module servo_holes(d=servo_wing_hole) {
-		rotate([0,0,90])
-		translate([-14.65,-servo_hole_y/2])
-		dirror_x(servo_hole_x)
-		dirror_y(servo_hole_y)
-		circle(d=d);
-	}
-
-	translate([0,0,-servo_wing_top])
-	linear_extrude(height=servo_wing_top)
-	difference() {
+module shield_positive() {
+	hull()
+	translate([0,0,-servo_wing_top]) {
+		linear_extrude(height=servo_wing_top)
 		hull()
 		servo_holes(servo_hole_od);
-		servo_holes();
+
+		arc(shield_od/2+pad,-shield_angle/2,shield_angle/2,servo_wing_top,shield_point_od);
 	}
-
-
 	// main body
 	translate([0,0,-servo_wing_top])
 	intersection() {
 		difference() {
 			arc(shield_od/2+pad,-shield_angle/2,shield_angle/2,shield_h,shield_point_od);
-			pad_z()
-			cylinder(d=shield_id,h=shield_h-shield_bearing_wall+pad);
+
+			// space for ball
+			translate([0,0,servo_wing_top-shield_upper_gap])
+			#cylinder(d=shield_id,h=shield_h-shield_bearing_wall-servo_wing_top+shield_upper_gap);
+
+			// bearing hole
 			translate([0,0,pad])
 			cylinder(d=bearing_od,h=shield_h);
 		};
 	};
 }
 
+module shield() {
+	difference() {
+		shield_positive();
+
+		pad_z()
+		translate([0,0,-servo_wing_top])
+		linear_extrude(height=servo_wing_top+padd)
+		servo_holes();
+
+		translate([-servo_y/2,-servo_x_offset,-servo_wing_top-pad])
+		cube([servo_y,servo_x,servo_wing_top+padd]);
+	};
+}
+
 module striker_assembly() {
 	striker();
 
-	futabas3003([0,0,0], [0,0,180]);
+	futabas3003([0,0,-3], [0,0,180]);
 	shield();
 
 	*translate([0,0,striker_h])
 	bearing();
 }
-
 
 //assemble();
 striker_assembly();
